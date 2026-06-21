@@ -2,209 +2,171 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Nexus Core Engine</title>
-  
-    <!-- ১. আপনার অ্যাড নেটওয়ার্কের SDK (xxxxxxxx এর জায়গায় আপনার আইডি বসান) -->
-    <script 
-        src='//libtl.com/sdk.js' 
-        data-zone='10856902' 
-        data-sdk='show_10856902' 
-        onerror="handleInitialError()">
-    </script>
-    
-    <!-- টেলিগ্রাম অফিশিয়াল SDK -->
-    <script src="https://telegram.org/js/telegram-web-app.js?2" onerror="handleInitialError()"></script>
-
-    <script>
-        // ফ্ল্যাগ এবং এরর হ্যান্ডলার (শুরুতে লোড না হলে রিলোড করবে)
-        window.appStarted = false; 
-
-        function handleInitialError() {
-            if (!window.appStarted) {
-                console.log("Script failed. Reloading...");
-                location.reload();
-            }
-        }
-
-        // আপনার আইডি থেকে অটোমেটিক ফাংশন নাম বের করার লজিক
-        const getAdFnName = () => {
-            const sdkScript = document.querySelector('script[data-sdk]');
-            return sdkScript ? sdkScript.getAttribute('data-sdk') : null;
-        };
-    </script>
-
-    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Inter:wght@400;900&display=swap" rel="stylesheet">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Core Engine V2</title>
+	
+	
+	
+	
+    <script src='//libtl.com/sdk.js' data-zone='10856902' data-sdk='show_10856902'></script>
+	
+	
+	
+	
+    <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Montserrat:wght@300;900&display=swap" rel="stylesheet">
     <style>
-        /* আপনার অরিজিনাল ডিজাইন ও সিএসএস */
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { background: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; overflow: hidden; width: 100vw; }
-        
-        /* লোডিং স্ক্রিন ও ফুল ক্লিক লক (সবকিছুর উপরে থাকবে) */
-        #loading-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #020617; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; z-index: 10000;
-            pointer-events: all; 
+        :root {
+            --glass-border: rgba(255, 255, 255, 0.1);
         }
-        .loader-spinner {
-            width: 50px; height: 50px; border: 3px solid rgba(56, 189, 248, 0.1);
-            border-radius: 50%; border-top-color: #38bdf8;
-            animation: spin 1s linear infinite; margin-bottom: 20px;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .loader-text { font-family: 'Syncopate', sans-serif; font-size: 0.65rem; letter-spacing: 3px; color: #38bdf8; text-transform: uppercase; }
 
-        /* মেইন ইউআই র‍্যাপার */
-        #main-wrapper { display: none; width: 100%; max-width: 400px; padding: 20px; }
-        
-        #block-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #020617; display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9999; text-align: center; padding: 30px; }
-        .block-msg { font-family: 'Syncopate', sans-serif; font-size: 0.9rem; color: #ef4444; letter-spacing: 2px; line-height: 1.5; }
-        
-        .engine-container { width: 100%; padding: 35px; text-align: center; border-radius: 45px; background: #0f172a; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 40px 80px rgba(0,0,0,0.6); }
-        .header-title { font-family: 'Syncopate', sans-serif; font-size: 0.65rem; letter-spacing: 4px; color: #475569; margin-bottom: 35px; text-transform: uppercase; }
-        
-        /* প্রগ্রেস সার্কেল ডিজাইন */
-        .visualizer { position: relative; width: 260px; height: 260px; margin: 0 auto 35px; }
-        svg { width: 260px; height: 260px; transform: rotate(-90deg); }
-        circle { fill: none; stroke-width: 14; stroke-linecap: round; }
-        .track { stroke: rgba(255,255,255,0.03); }
-        .progress-path { stroke: #38bdf8; stroke-dasharray: 754; stroke-dashoffset: 754; transition: stroke-dashoffset 1s ease; filter: drop-shadow(0 0 12px #38bdf8); }
-        .core-data { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-        .percent-val { font-size: 4rem; font-weight: 900; background: linear-gradient(#fff, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
-        .metric-card { background: rgba(0,0,0,0.2); border-radius: 20px; padding: 20px; margin-bottom: 30px; }
-        .metric-label { font-size: 0.6rem; color: #64748b; letter-spacing: 2px; text-transform: uppercase; }
-        .metric-value { font-size: 1.5rem; font-weight: 700; color: #f1f5f9; margin-top: 5px; }
-        
-        .action-trigger { background: #f8fafc; color: #020617; border: none; padding: 22px; width: 100%; border-radius: 20px; font-size: 1rem; font-weight: 900; cursor: pointer; text-transform: uppercase; }
-        .action-trigger:disabled { background: #1e293b; color: #475569; cursor: not-allowed; opacity: 0.6; }
-        #system-status { margin-top: 20px; font-size: 0.75rem; color: #334155; height: 15px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #05070a; 
+            font-family: 'Montserrat', sans-serif; 
+            display: flex; align-items: center; justify-content: center; 
+            height: 100vh; color: white; overflow: hidden;
+        }
+
+        .premium-container {
+            width: 90%; max-width: 400px;
+            padding: 45px 30px;
+            background: rgba(15, 23, 42, 0.7);
+            border-radius: 60px;
+            text-align: center;
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(25px);
+            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        /* সার্কেল বক্স (শুধু ফ্রেম থাকবে, কোন পানি নেই) */
+        .liquid-box {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 35px;
+            background: #000;
+            border-radius: 50%;
+            border: 8px solid #111827;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.9), 0 0 30px rgba(0, 210, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .percent-text {
+            font-size: 3.8rem; font-weight: 900;
+            letter-spacing: -2px;
+            color: #fff;
+            text-shadow: 0 0 20px rgba(56, 189, 248, 0.6);
+        }
+
+        .dev-branding {
+            margin-bottom: 35px;
+            padding: 10px;
+        }
+
+        .dev-title {
+            font-size: 0.6rem;
+            letter-spacing: 5px;
+            color: #475569;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .dev-name {
+            font-family: 'Syncopate', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(180deg, #FFFFFF 0%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            filter: drop-shadow(0 2px 10px rgba(56, 189, 248, 0.4));
+        }
+
+        .sync-btn {
+            background: linear-gradient(145deg, #ffffff, #cbd5e1);
+            color: #020617;
+            border: none;
+            width: 100%; padding: 22px;
+            border-radius: 25px;
+            font-size: 1.1rem; font-weight: 900;
+            text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .sync-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 210, 255, 0.3);
+        }
+
+        .sync-btn:disabled {
+            background: #1e293b; color: #475569;
+            cursor: not-allowed; box-shadow: none;
+        }
+
+        #status-info {
+            margin-top: 20px; font-size: 11px;
+            text-transform: uppercase; letter-spacing: 2px;
+            color: #334155;
+        }
     </style>
 </head>
 <body>
 
-<!-- লোডিং স্ক্রিন -->
-<div id="loading-overlay">
-    <div class="loader-spinner"></div>
-    <div class="loader-text">Nexus Core Initializing...</div>
-</div>
-
-<!-- রিজিওন ব্লক স্ক্রিন -->
-<div id="block-screen">
-    <div class="block-msg">ACCESS DENIED:<br>UNAUTHORIZED REGION DETECTED</div>
-</div>
-
-<!-- আপনার অরিজিনাল ইউআই কন্টেন্ট -->
-<div id="main-wrapper">
-    <div class="engine-container" id="main-ui">
-        <div class="header-title">Nexus Core Engine</div>
-        <div class="visualizer">
-            <svg viewBox="0 0 280 280">
-                <circle class="track" cx="140" cy="140" r="120"></circle>
-                <circle id="path" class="progress-path" cx="140" cy="140" r="120"></circle>
-            </svg>
-            <div class="core-data"><span class="percent-val" id="ui-percent">0%</span></div>
-        </div>
-        <div class="metric-card">
-            <div class="metric-label">SYSTEM DEVELOPER</div>
-            <div class="metric-value">Mamun Hossain</div>
-        </div>
-        <button class="action-trigger" id="ui-btn" onclick="processStart()">Execute Sync</button>
-        <div id="system-status">System Standby</div>
+<div class="premium-container" id="main-ui">
+    <div style="font-size: 9px; letter-spacing: 6px; color: #38bdf8; margin-bottom: 30px; font-weight: 900;">Nexus Core Engine V2</div>
+    
+    <div class="liquid-box">
+        <!-- এখানে আগে ওয়াটার ডিপ ছিল, এখন শুধু পার্সেন্ট আছে -->
+        <div class="percent-text" id="ui-percent">0%</div>
     </div>
+
+    <div class="dev-branding">
+        <div class="dev-title">System Architect</div>
+        <div class="dev-name">Mamun Hossain</div>
+    </div>
+
+    <button class="sync-btn" id="ui-btn" onclick="processStart()">Execute Sync</button>
+    <div id="status-info">System Secure</div>
 </div>
 
 <script>
-    // চেক করা হচ্ছে সব স্ক্রিপ্ট লোড হয়েছে কি না
-    function checkAppStatus() {
-        if (window.appStarted) return;
-
-        const adFn = getAdFnName();
-        const isAdReady = typeof window[adFn] === 'function';
-        const isTgReady = typeof window.Telegram !== 'undefined' && window.Telegram.WebApp;
-
-        if (isAdReady && isTgReady) {
-            initNexusCore();
-        } else {
-            // যদি লোড না হয়, ৫ সেকেন্ড অপেক্ষা করে অটো-রিলোড
-            setTimeout(() => {
-                if (!window.appStarted) {
-                    location.reload();
-                }
-            }, 5000);
-        }
-    }
-
-    function initNexusCore() {
-        if (window.appStarted) return;
-
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
-        tg.enableClosingConfirmation();
-
-        // অরিজিনাল রিজিওন চেক
-        securityMonitor().then(() => {
-            window.appStarted = true; // সফলভাবে শুরু হওয়ার পর ফ্ল্যাগ সেট
-            
-            // লোডিং স্ক্রিন সরানো এবং মেইন ইউআই দেখানো
-            const loader = document.getElementById('loading-overlay');
-            loader.style.opacity = '0';
-            setTimeout(() => {
-                loader.style.display = 'none';
-                document.getElementById('main-wrapper').style.display = 'block';
-                updateUI();
-            }, 500);
-        }).catch(() => {
-            window.appStarted = true;
-            document.getElementById('loading-overlay').style.display = 'none';
-        });
-    }
-
-    // পেজ লোড হলে চেক শুরু হবে
-    window.onload = checkAppStatus;
-
-    // অরিজিনাল সিকিউরিটি মনিটর লজিক
-    async function securityMonitor() {
+    // ১. সিকিউরিটি (BD ব্লক)
+    async function checkSecurity() {
         try {
             const res = await fetch('https://api.country.is');
             const data = await res.json();
-            return handleRegion(data.country);
-        } catch (e) {
-            return fetch('https://ipapi.co/json/').then(r => r.json()).then(d => handleRegion(d.country_code));
-        }
+            if (data.country === 'BD') {
+                document.body.innerHTML = '<h1 style="color:red; font-family:Syncopate;">ACCESS DENIED</h1>';
+            }
+        } catch (e) {}
     }
+    checkSecurity();
 
-    function handleRegion(code) {
-        if (code === 'BD') {
-            document.getElementById('main-wrapper').style.display = 'none';
-            document.getElementById('block-screen').style.display = 'flex';
-            return Promise.reject();
-        }
-        return Promise.resolve();
-    }
-
-    // আপনার অরিজিনাল প্রগ্রেস লজিক
+    // ২. লজিক (শুধু পার্সেন্ট আপডেট হবে)
     let cyclePercent = parseInt(localStorage.getItem('savedPercent')) || 0;
-    const ringDash = 754;
-    const path = document.getElementById('path');
     const percentEl = document.getElementById('ui-percent');
     const btnEl = document.getElementById('ui-btn');
-    const statusEl = document.getElementById('system-status');
+    const statusEl = document.getElementById('status-info');
 
     function updateUI() {
         if (cyclePercent > 100) cyclePercent = 100;
-        const offset = ringDash - (cyclePercent / 100) * ringDash;
-        path.style.strokeDashoffset = offset;
+        
+        // শুধু সংখ্যা আপডেট হবে
         percentEl.innerText = cyclePercent + "%";
         localStorage.setItem('savedPercent', cyclePercent);
 
+        // ১০০% হলে বাটন স্থায়ী লক
         if (cyclePercent >= 100) {
             btnEl.disabled = true;
-            btnEl.innerText = "COMPLETED";
-            statusEl.innerText = "System Maximum Capacity Reached";
+            btnEl.innerText = "System Finalized";
+            statusEl.innerText = "Maximum Capacity Reached";
+            statusEl.style.color = "#38bdf8";
         }
     }
 
@@ -212,44 +174,27 @@
         if (cyclePercent >= 100) return;
         
         btnEl.disabled = true;
-        statusEl.innerText = "Synchronizing Data...";
+        statusEl.innerText = "Syncing with Core...";
 
-        // আপনার ১০ সেকেন্ড বাটন লক রাখার লজিক
         setTimeout(() => {
             if (cyclePercent < 100) {
                 btnEl.disabled = false;
-                statusEl.innerText = "System Standby";
+                statusEl.innerText = "System Secure";
             }
         }, 10000);
 
-        const adFn = getAdFnName();
-        try {
-            if (typeof window[adFn] === 'function') {
-                window[adFn]().then(() => {
-                    onFinishedSuccess();
-                }).catch(() => {
-                    statusEl.innerText = "Sync Failed: Ad Not Loaded";
-                    btnEl.disabled = false;
-                });
-            } else {
-                statusEl.innerText = "Error: Protocol Offline";
-                btnEl.disabled = false;
-            }
-        } catch (err) {
-            statusEl.innerText = "Connection Error";
-            btnEl.disabled = false;
+        if (typeof show_10856902 === 'function') {
+            show_10856902().then(() => {
+                cyclePercent++;
+                updateUI();
+            }).catch(() => {
+                statusEl.innerText = "Connection Refused.";
+            });
         }
     }
 
-    function onFinishedSuccess() {
-        if (cyclePercent < 100) {
-            cyclePercent++;
-            updateUI();
-            if (cyclePercent < 100) {
-                statusEl.innerText = "Sync Verified Successfully.";
-            }
-        }
-    }
+    // প্রাথমিক লোড
+    updateUI();
 </script>
 </body>
 </html>
